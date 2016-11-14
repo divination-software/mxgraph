@@ -5,6 +5,7 @@ Format = function(editorUi, container)
 {
 	this.editorUi = editorUi;
 	this.container = container;
+	this.called = false;
 };
 
 /**
@@ -365,15 +366,13 @@ Format.prototype.refresh = function()
 
 		div.appendChild(label);
 		this.panels.push(new DiagramFormatPanel(this, ui, div));
-	}
-	else if (graph.isEditing()) {
-    var called = false;
-    if (!called) {
-      console.log('Double clicked -- ');
+	} else if (graph.isEditing() && graph.cellEditor.editingCell) {
+    if (!this.called) {
       var dlg = new EditDataDialog(ui, graph.cellEditor.editingCell);
       ui.showDialog(dlg.container, 320, 320, true, false);
       dlg.init();
-      setTimeout(this.bind(function() {called = true}), 500);
+			this.called = true;
+      setTimeout(mxUtils.bind(this, function() {this.called = false}), 2000);
     }
 	// } else if (graph.isEditing()) {
   //   mxUtils.write(label, mxResources.get('text'));

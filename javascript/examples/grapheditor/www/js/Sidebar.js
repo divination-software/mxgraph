@@ -880,7 +880,7 @@ Sidebar.prototype.addModulePalette = function(expand)
 {
 	var fns = [
 		this.createVertexTemplateEntry('shape=step;whiteSpace=wrap;html=1;', 120, 60, 'Source', 'Source'),
-		this.createVertexTemplateEntry('whiteSpace=wrap;html=1;', 120, 60, 'Process', 'Process', null, null, 'rect rectangle box'),
+		this.createVertexTemplateEntry('shape=action;whiteSpace=wrap;html=1;', 120, 60, 'Process', 'Process', null, null, 'rect rectangle box'),
 		this.createVertexTemplateEntry('shape=exit;whiteSpace=wrap,html=1;', 120, 60, 'Exit', 'Exit'),
 		this.createVertexTemplateEntry('shape=decision;whiteSpace=wrap,html=1;', 100, 60, 'Decision', 'Decision'),
 		this.createVertexTemplateEntry('shape=modify;whiteSpace=wrap,html=1;', 120, 60, 'Modify', 'Modify'),
