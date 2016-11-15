@@ -697,64 +697,36 @@
 
 	// End of hand jiggle integration
 
-	// Process Shape
+  // BEGIN Discrete Event Simulation Shapes
+
+	// Source shape
+	function SourceShape()
+	{
+		mxActor.call(this);
+	};
+	mxUtils.extend(SourceShape, mxActor);
+	SourceShape.prototype.size = 0.2;
+	SourceShape.prototype.redrawPath = function(c, x, y, w, h)
+	{
+		var s =  w * Math.max(0, Math.min(1, parseFloat(mxUtils.getValue(this.style, 'size', this.size))));
+		var arcSize = mxUtils.getValue(this.style, mxConstants.STYLE_ARCSIZE, mxConstants.LINE_ARCSIZE) / 2;
+		this.addPoints(c, [new mxPoint(0, 0), new mxPoint(w - s, 0), new mxPoint(w, h / 2), new mxPoint(w - s, h),
+											 new mxPoint(0, h)], this.isRounded, arcSize, true);
+		c.end();
+	};
+
+	mxCellRenderer.prototype.defaultShapes['source'] = SourceShape;
+
+
+	// Process shape
 	function ProcessShape()
 	{
 		mxRectangleShape.call(this);
 	};
 	mxUtils.extend(ProcessShape, mxRectangleShape);
-	ProcessShape.prototype.size = 0.1;
 	ProcessShape.prototype.isHtmlAllowed = function()
 	{
 		return false;
-	};
-	ProcessShape.prototype.getLabelBounds = function(rect)
-	{
-		if (mxUtils.getValue(this.state.style, mxConstants.STYLE_HORIZONTAL, true) ==
-			(this.direction == null ||
-			this.direction == mxConstants.DIRECTION_EAST ||
-			this.direction == mxConstants.DIRECTION_WEST))
-		{
-			var w = rect.width;
-			var h = rect.height;
-			var r = new mxRectangle(rect.x, rect.y, w, h);
-
-			var inset = w * Math.max(0, Math.min(1, parseFloat(mxUtils.getValue(this.style, 'size', this.size))));
-
-			if (this.isRounded)
-			{
-				var f = mxUtils.getValue(this.style, mxConstants.STYLE_ARCSIZE,
-					mxConstants.RECTANGLE_ROUNDING_FACTOR * 100) / 100;
-				inset = Math.max(inset, Math.min(w * f, h * f));
-			}
-
-			r.x += inset;
-			r.width -= 2 * inset;
-
-			return r;
-		}
-
-		return rect;
-	};
-	ProcessShape.prototype.paintForeground = function(c, x, y, w, h)
-	{
-		var inset = w * Math.max(0, Math.min(1, parseFloat(mxUtils.getValue(this.style, 'size', this.size))));
-
-		if (this.isRounded)
-		{
-			var f = mxUtils.getValue(this.style, mxConstants.STYLE_ARCSIZE,
-				mxConstants.RECTANGLE_ROUNDING_FACTOR * 100) / 100;
-			inset = Math.max(inset, Math.min(w * f, h * f));
-		}
-
-		c.begin();
-		c.moveTo(x + inset, y);
-		c.lineTo(x + inset, y + h);
-		c.moveTo(x + w - inset, y);
-		c.lineTo(x + w - inset, y + h);
-		c.end();
-		c.stroke();
-		mxRectangleShape.prototype.paintForeground.apply(this, arguments);
 	};
 
 	mxCellRenderer.prototype.defaultShapes['process'] = ProcessShape;
@@ -867,6 +839,8 @@
 	};
 
 	mxCellRenderer.prototype.defaultShapes['separate'] = SeparateShape;
+
+  // END Discrete Event Simulation Shapes
 
 	// Step shape
 	function StepShape()
@@ -3369,4 +3343,81 @@
 	  	                             new mxConnectionConstraint(new mxPoint(1, 0.5), false),
 	  	                             new mxConnectionConstraint(new mxPoint(0.7, 0.1), false),
 	  	                             new mxConnectionConstraint(new mxPoint(0.7, 0.9), false)];
+
+  // BEGIN Discrete Event Simulation Shape constraints
+/*
+  mxRectangleShape.prototype.constraints = [
+    new mxConnectionConstraint(new mxPoint(0.25, 0), true),
+    new mxConnectionConstraint(new mxPoint(0.5, 0), true),
+    new mxConnectionConstraint(new mxPoint(0.75, 0), true),
+    new mxConnectionConstraint(new mxPoint(0, 0.25), true),
+    new mxConnectionConstraint(new mxPoint(0, 0.5), true),
+    new mxConnectionConstraint(new mxPoint(0, 0.75), true),
+    new mxConnectionConstraint(new mxPoint(1, 0.25), true),
+    new mxConnectionConstraint(new mxPoint(1, 0.5), true),
+    new mxConnectionConstraint(new mxPoint(1, 0.75), true),
+    new mxConnectionConstraint(new mxPoint(0.25, 1), true),
+    new mxConnectionConstraint(new mxPoint(0.5, 1), true),
+    new mxConnectionConstraint(new mxPoint(0.75, 1), true)
+  ];
+  */
+
+  SourceShape.prototype.constraints = [
+    new mxConnectionConstraint(new mxPoint(1, 0.5), true),
+  ];
+  ExitShape.prototype.constraints = [
+    new mxConnectionConstraint(new mxPoint(0, 0.5), true),
+  ];
+  ProcessShape.prototype.constraints = mxRectangleShape.prototype.constraints;
+  DecisionShape.prototype.constraints = [
+    new mxConnectionConstraint(new mxPoint(0, 0.5), true),
+    new mxConnectionConstraint(new mxPoint(1, 0.5), true),
+    new mxConnectionConstraint(new mxPoint(0.5, 0), true),
+    new mxConnectionConstraint(new mxPoint(0.5, 1), true),
+  ];
+  ModifyShape.prototype.constraints = mxRectangleShape.prototype.constraints;
+  RecordShape.prototype.constraints = [
+    // new mxConnectionConstraint(new mxPoint(0.25, 0), true),
+    new mxConnectionConstraint(new mxPoint(0.5, 0), true),
+    new mxConnectionConstraint(new mxPoint(0.75, 0), true),
+    // new mxConnectionConstraint(new mxPoint(0, 0.25), true),
+    new mxConnectionConstraint(new mxPoint(0, 0.5), true),
+    new mxConnectionConstraint(new mxPoint(0, 0.75), true),
+    new mxConnectionConstraint(new mxPoint(1, 0.25), true),
+    new mxConnectionConstraint(new mxPoint(1, 0.5), true),
+    new mxConnectionConstraint(new mxPoint(1, 0.75), true),
+    new mxConnectionConstraint(new mxPoint(0.25, 1), true),
+    new mxConnectionConstraint(new mxPoint(0.5, 1), true),
+    new mxConnectionConstraint(new mxPoint(0.75, 1), true)
+  ];
+  SeparateShape.prototype.constraints = [
+    new mxConnectionConstraint(new mxPoint(0.25, 0.15), false),
+    new mxConnectionConstraint(new mxPoint(0.5, 0.10), false),
+    new mxConnectionConstraint(new mxPoint(0.75, 0.05), false),
+    new mxConnectionConstraint(new mxPoint(0, 0.25), true),
+    new mxConnectionConstraint(new mxPoint(0, 0.5), true),
+    new mxConnectionConstraint(new mxPoint(0, 0.75), true),
+    new mxConnectionConstraint(new mxPoint(1, 0.25), true),
+    new mxConnectionConstraint(new mxPoint(1, 0.5), true),
+    new mxConnectionConstraint(new mxPoint(1, 0.75), true),
+    new mxConnectionConstraint(new mxPoint(0.25, 0.85), false),
+    new mxConnectionConstraint(new mxPoint(0.5, 0.90), false),
+    new mxConnectionConstraint(new mxPoint(0.75, 0.95), false)
+  ];
+  BatchShape.prototype.constraints = [
+    new mxConnectionConstraint(new mxPoint(0.25, 0.05), false),
+    new mxConnectionConstraint(new mxPoint(0.5, 0.10), false),
+    new mxConnectionConstraint(new mxPoint(0.75, 0.15), false),
+    new mxConnectionConstraint(new mxPoint(0, 0.25), true),
+    new mxConnectionConstraint(new mxPoint(0, 0.5), true),
+    new mxConnectionConstraint(new mxPoint(0, 0.75), true),
+    new mxConnectionConstraint(new mxPoint(1, 0.25), true),
+    new mxConnectionConstraint(new mxPoint(1, 0.5), true),
+    new mxConnectionConstraint(new mxPoint(1, 0.75), true),
+    new mxConnectionConstraint(new mxPoint(0.25, 0.95), false),
+    new mxConnectionConstraint(new mxPoint(0.5, 0.90), false),
+    new mxConnectionConstraint(new mxPoint(0.75, 0.85), false)
+  ];
+
+  // END Discrete Event Simulation Shape constraints
 })();
